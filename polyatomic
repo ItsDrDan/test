@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polyatomic Ion Formula Finder</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 40px 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f5f7;
+      color: #222;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 32px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      text-align: center;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      margin-bottom: 28px;
+      text-align: center;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #c7cdd3;
+      border-radius: 10px;
+      font-size: 1.1rem;
+    }
+
+    input:focus {
+      border-color: #24547d;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(36, 84, 125, 0.12);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      flex: 1;
+      padding: 13px 16px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #findButton {
+      background: #24547d;
+      color: #ffffff;
+    }
+
+    #findButton:hover {
+      background: #193e5e;
+    }
+
+    #clearButton {
+      background: #e7eaed;
+      color: #222;
+    }
+
+    #clearButton:hover {
+      background: #d6dadd;
+    }
+
+    .result {
+      display: none;
+      margin-top: 28px;
+      padding: 26px;
+      text-align: center;
+      background: #f4f8fc;
+      border: 2px solid #d6e3ef;
+      border-radius: 12px;
+    }
+
+    .result-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .formula {
+      margin: 14px 0;
+      color: #153d63;
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .formula sub {
+      font-size: 0.6em;
+    }
+
+    .formula sup {
+      font-size: 0.55em;
+    }
+
+    .charge {
+      color: #555;
+      font-size: 1.05rem;
+    }
+
+    .message {
+      display: none;
+      margin-top: 20px;
+      padding: 14px;
+      text-align: center;
+      border-radius: 10px;
+      background: #fff1f1;
+      color: #8c1d1d;
+    }
+
+    .examples {
+      margin-top: 24px;
+      color: #6a6a6a;
+      text-align: center;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 520px) {
+      .container {
+        padding: 22px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      .formula {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Polyatomic Ion Formula Finder</h1>
+
+    <p class="subtitle">
+      Type the name of a polyatomic ion to display its formula and charge.
+    </p>
+
+    <label for="ionInput">Polyatomic ion name</label>
+
+    <input
+      id="ionInput"
+      type="text"
+      list="ionList"
+      placeholder="Example: sulfate"
+      autocomplete="off"
+    >
+
+    <datalist id="ionList"></datalist>
+
+    <div class="buttons">
+      <button id="findButton" type="button">Find Formula</button>
+      <button id="clearButton" type="button">Clear</button>
+    </div>
+
+    <section id="result" class="result" aria-live="polite">
+      <div id="resultName" class="result-name"></div>
+      <div id="formula" class="formula"></div>
+      <div id="charge" class="charge"></div>
+    </section>
+
+    <div id="message" class="message" aria-live="polite">
+      Ion not found. Check the spelling and try again.
+    </div>
+
+    <p class="examples">
+      Try: sulfate, nitrate, ammonium, hydroxide, phosphate, carbonate,
+      acetate, permanganate, or dichromate.
+    </p>
+  </main>
+
+  <script>
+    const ions = {
+      "acetate": {
+        name: "Acetate",
+        formula: "C<sub>2</sub>H<sub>3</sub>O<sub>2</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "ammonium": {
+        name: "Ammonium",
+        formula: "NH<sub>4</sub><sup>+</sup>",
+        charge: "1+"
+      },
+      "carbonate": {
+        name: "Carbonate",
+        formula: "CO<sub>3</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "hydrogen carbonate": {
+        name: "Hydrogen Carbonate",
+        formula: "HCO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "bicarbonate": {
+        name: "Hydrogen Carbonate (Bicarbonate)",
+        formula: "HCO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "hydroxide": {
+        name: "Hydroxide",
+        formula: "OH<sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "nitrate": {
+        name: "Nitrate",
+        formula: "NO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "nitrite": {
+        name: "Nitrite",
+        formula: "NO<sub>2</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "sulfate": {
+        name: "Sulfate",
+        formula: "SO<sub>4</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "sulfite": {
+        name: "Sulfite",
+        formula: "SO<sub>3</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "hydrogen sulfate": {
+        name: "Hydrogen Sulfate",
+        formula: "HSO<sub>4</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "bisulfate": {
+        name: "Hydrogen Sulfate (Bisulfate)",
+        formula: "HSO<sub>4</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "phosphate": {
+        name: "Phosphate",
+        formula: "PO<sub>4</sub><sup>3&minus;</sup>",
+        charge: "3−"
+      },
+      "hydrogen phosphate": {
+        name: "Hydrogen Phosphate",
+        formula: "HPO<sub>4</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "dihydrogen phosphate": {
+        name: "Dihydrogen Phosphate",
+        formula: "H<sub>2</sub>PO<sub>4</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "hypochlorite": {
+        name: "Hypochlorite",
+        formula: "ClO<sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "chlorite": {
+        name: "Chlorite",
+        formula: "ClO<sub>2</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "chlorate": {
+        name: "Chlorate",
+        formula: "ClO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "perchlorate": {
+        name: "Perchlorate",
+        formula: "ClO<sub>4</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "bromate": {
+        name: "Bromate",
+        formula: "BrO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "iodate": {
+        name: "Iodate",
+        formula: "IO<sub>3</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "permanganate": {
+        name: "Permanganate",
+        formula: "MnO<sub>4</sub><sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "chromate": {
+        name: "Chromate",
+        formula: "CrO<sub>4</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "dichromate": {
+        name: "Dichromate",
+        formula: "Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "cyanide": {
+        name: "Cyanide",
+        formula: "CN<sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "cyanate": {
+        name: "Cyanate",
+        formula: "OCN<sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "thiocyanate": {
+        name: "Thiocyanate",
+        formula: "SCN<sup>&minus;</sup>",
+        charge: "1−"
+      },
+      "peroxide": {
+        name: "Peroxide",
+        formula: "O<sub>2</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "oxalate": {
+        name: "Oxalate",
+        formula: "C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "thiosulfate": {
+        name: "Thiosulfate",
+        formula: "S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup>",
+        charge: "2−"
+      },
+      "borate": {
+        name: "Borate",
+        formula: "BO<sub>3</sub><sup>3&minus;</sup>",
+        charge: "3−"
+      },
+      "hydronium": {
+        name: "Hydronium",
+        formula: "H<sub>3</sub>O<sup>+</sup>",
+        charge: "1+"
+      }
+    };
+
+    const input = document.getElementById("ionInput");
+    const ionList = document.getElementById("ionList");
+    const findButton = document.getElementById("findButton");
+    const clearButton = document.getElementById("clearButton");
+    const result = document.getElementById("result");
+    const resultName = document.getElementById("resultName");
+    const formula = document.getElementById("formula");
+    const charge = document.getElementById("charge");
+    const message = document.getElementById("message");
+
+    Object.keys(ions)
+      .sort()
+      .forEach(function (ionName) {
+        const option = document.createElement("option");
+        option.value = ionName;
+        ionList.appendChild(option);
+      });
+
+    function normalizeName(value) {
+      return value
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, " ");
+    }
+
+    function showIon() {
+      const search = normalizeName(input.value);
+
+      if (ions[search]) {
+        const ion = ions[search];
+
+        resultName.textContent = ion.name;
+        formula.innerHTML = ion.formula;
+        charge.textContent = "Charge: " + ion.charge;
+
+        result.style.display = "block";
+        message.style.display = "none";
+      } else {
+        result.style.display = "none";
+        message.style.display = "block";
+      }
+    }
+
+    function clearTool() {
+      input.value = "";
+      result.style.display = "none";
+      message.style.display = "none";
+      input.focus();
+    }
+
+    findButton.addEventListener("click", showIon);
+    clearButton.addEventListener("click", clearTool);
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        showIon();
+      }
+    });
+
+    input.addEventListener("change", function () {
+      const search = normalizeName(input.value);
+      if (ions[search]) {
+        showIon();
+      }
+    });
+  </script>
+</body>
+</html>
